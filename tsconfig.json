@@ -4,10 +4,12 @@
     // File Layout
     "rootDir": "./src",
     "outDir": "./dist",
+    "allowJs": true,
     "esModuleInterop": true,
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
+    "moduleResolution": "nodenext",
     "target": "esnext",
     "types": [],
     // For nodejs:
@@ -34,6 +36,8 @@
 
     // Recommended Options
     "strict": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,

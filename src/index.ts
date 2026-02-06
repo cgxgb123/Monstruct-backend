@@ -6,7 +6,7 @@ import type { Request } from "express";
 import http from "http";
 import cors from "cors";
 import dotenv from "dotenv";
-import db from "./config/connection.js"; // PLACEHOLDER
+import db from "./config/connection.ts"; // change to js for compilation
 // import { typeDefs, resolvers } from './schemas'; // PLACEHOLDER
 
 dotenv.config();

@@ -18,7 +18,7 @@ export const typeDefs = gql`
   type Pokemon {
     id: Int
     name: String
-     sprites: Spritest  
+     sprites: Sprites
      types: [TypeSlot]
   }
 

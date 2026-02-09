@@ -1,32 +1,36 @@
 import { gql } from 'graphql-tag';
 
 export const typeDefs = gql`
-  type User {
-    _id: ID
-    username: String
-    email: String
-    teams: [Team]
+  type Query {
+    me: User
+    getPokemon(name: String!): Pokemon
+    getTeams: [Team]
   }
 
   type Team {
     _id: ID
     teamName: String
-    pokemon: [String]
+    pokemon: [String] // ids stored in db
+    pokemonDetails: [Pokemon] // actual data fetched through axios
     owner: User
     createdAt: String
   }
-
-  type Auth {
-    token: String
-    user: User
+  type Pokemon {
+    id: Int
+    name: String
+     sprites: Spritest  
+     types: [TypeSlot]
   }
 
-  type Query {
-    me: User
-    hello: String
+  type Sprites {
+    front_default: String
   }
 
-  type Mutation {
-    testSignup(username: String!, email: String!, password: String!): Auth
+  type TypeSlot {
+    type: TypeInfo
+  }
+
+  type TypeInfo {
+    name: String
   }
 `;

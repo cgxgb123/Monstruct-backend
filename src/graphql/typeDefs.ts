@@ -10,8 +10,8 @@ export const typeDefs = gql`
   type Team {
     _id: ID
     teamName: String
-    pokemon: [String] // ids stored in db
-    pokemonDetails: [Pokemon] // actual data fetched through axios
+    pokemon: [String] 
+    pokemonDetails: [Pokemon] 
     owner: User
     createdAt: String
   }

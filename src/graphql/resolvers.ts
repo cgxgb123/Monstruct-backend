@@ -5,7 +5,33 @@ import axios from 'axios';
 
 export const resolvers = {
   Query: {
-    // getPokemon and getTeams queries
+    // 1. Fetch a single Pokemon from PokeAPI
+    getPokemon: async (_parent: any, { name }: { name: string }) => {
+      console.log(`Searching PokeAPI for: ${name}`);
+      try {
+        const { data } = await axios.get(
+          `https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`,
+        );
+        return data;
+      } catch (err) {
+        console.error('PokeAPI Error:', err);
+        throw new Error('Could not find that Pokemon. Check your spelling!');
+      }
+    },
+
+    // 2. Fetch all teams for the logged-in user
+    getTeams: async (_parent: any, _args: any, context: any) => {
+      if (!context.user) throw new Error('Not logged in');
+      return Team.find({ owner: context.user._id }).populate('owner');
+    },
+
+    // 3. Get currently logged-in user data
+    me: async (_parent: any, _args: any, context: any) => {
+      if (context.user) {
+        return User.findOne({ _id: context.user._id });
+      }
+      throw new Error('Not logged in');
+    },
   },
   Mutation: {
     testSignup: async (_parent: any, { username, email, password }: any) => {

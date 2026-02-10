@@ -33,6 +33,8 @@ export const typeDefs = gql`
     name: String
     sprites: Sprites
     types: [TypeSlot]
+    spriteUrl: String # animated gif URL
+    modelUrl: String # 3D model URL (if available)
   }
 
   type Sprites {
@@ -48,8 +50,9 @@ export const typeDefs = gql`
   }
 
   type Mutation {
-    testSignup(username: String!, email: String!, password: String!): Auth
+    signup(username: String!, email: String!, password: String!): Auth
     login(email: String!, password: String!): Auth
     saveTeam(teamName: String!, pokemon: [String]!): Team
+    removeTeam(teamId: ID!): User
   }
 `;

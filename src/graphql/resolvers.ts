@@ -35,5 +35,29 @@ export const resolvers = {
         throw new Error(`Login failed: ${err.message}`);
       }
     },
+
+    saveTeam: async (
+      _parent: any,
+      { teamName, pokemon }: any,
+      context: any,
+    ) => {
+      if (!context.user) {
+        throw new Error('You must be logged in to build a team!');
+      }
+
+      const newTeam = await Team.create({
+        teamName,
+        pokemon,
+        owner: context.user._id,
+      });
+
+      await User.findByIdAndUpdate(
+        context.user._id,
+        { $push: { teams: newTeam._id } },
+        { new: true },
+      );
+
+      return newTeam;
+    },
   },
 };

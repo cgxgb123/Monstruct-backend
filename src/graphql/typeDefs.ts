@@ -1,6 +1,18 @@
 import { gql } from 'graphql-tag';
 
 export const typeDefs = gql`
+  type User {
+    _id: ID
+    username: String
+    email: String
+    teams: [Team]
+  }
+
+  type Auth {
+    token: String
+    user: User
+  }
+
   type Query {
     me: User
     getPokemon(name: String!): Pokemon
@@ -10,16 +22,17 @@ export const typeDefs = gql`
   type Team {
     _id: ID
     teamName: String
-    pokemon: [String] 
-    pokemonDetails: [Pokemon] 
+    pokemon: [String]
+    pokemonDetails: [Pokemon]
     owner: User
     createdAt: String
   }
+
   type Pokemon {
     id: Int
     name: String
-     sprites: Sprites
-     types: [TypeSlot]
+    sprites: Sprites
+    types: [TypeSlot]
   }
 
   type Sprites {
@@ -32,5 +45,11 @@ export const typeDefs = gql`
 
   type TypeInfo {
     name: String
+  }
+
+  type Mutation {
+    testSignup(username: String!, email: String!, password: String!): Auth
+    login(email: String!, password: String!): Auth
+    saveTeam(teamName: String!, pokemon: [String]!): Team
   }
 `;

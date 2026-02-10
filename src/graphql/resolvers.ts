@@ -86,8 +86,6 @@ export const resolvers = {
       return populatedTeam.populate('owner');
     },
   },
-  // String to find 3d sprites:
-  // https://play.pokemonshowdown.com/sprites/ani/${pokeName}.gif
   Team: {
     pokemonDetails: async (parent: any) => {
       const requests = parent.pokemon.map((name: string) =>
@@ -95,6 +93,20 @@ export const resolvers = {
       );
       const responses = await Promise.all(requests);
       return responses.map((res) => res.data);
+    },
+  },
+  Pokemon: {
+    // This creates the animated 3D GIF link
+    spriteUrl: (parent: any) => {
+      const cleanName = parent.name.toLowerCase().replace(/[^\w-]/g, '');
+      return `https://play.pokemonshowdown.com/sprites/ani/${cleanName}.gif`;
+    },
+    // This grabs the high-res 3D static render from the PokeAPI data
+    modelUrl: (parent: any) => {
+      return (
+        parent.sprites.other?.home?.front_default ||
+        parent.sprites.front_default
+      );
     },
   },
 };

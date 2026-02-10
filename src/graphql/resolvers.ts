@@ -71,7 +71,7 @@ export const resolvers = {
         throw new Error('You must be logged in to build a team!');
       }
 
-      const newTeam = await Team.create({
+      const populatedTeam = await Team.create({
         teamName,
         pokemon,
         owner: context.user._id,
@@ -79,14 +79,15 @@ export const resolvers = {
 
       await User.findByIdAndUpdate(
         context.user._id,
-        { $push: { teams: newTeam._id } },
+        { $push: { teams: populatedTeam._id } },
         { new: true },
       );
 
-      return newTeam;
+      return populatedTeam.populate('owner');
     },
   },
-
+  // String to find 3d sprites:
+  // https://play.pokemonshowdown.com/sprites/ani/${pokeName}.gif
   Team: {
     pokemonDetails: async (parent: any) => {
       const requests = parent.pokemon.map((name: string) =>

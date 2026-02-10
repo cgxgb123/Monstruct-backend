@@ -34,7 +34,7 @@ export const resolvers = {
     },
   },
   Mutation: {
-    testSignup: async (_parent: any, { username, email, password }: any) => {
+    signup: async (_parent: any, { username, email, password }: any) => {
       try {
         const user = await User.create({ username, email, password });
         const token = signToken(user.username, user.email, user._id);
@@ -84,6 +84,32 @@ export const resolvers = {
       );
 
       return populatedTeam.populate('owner');
+    },
+    removeTeam: async (
+      _parent: any,
+      { teamId }: { teamId: string },
+      context: any,
+    ) => {
+      if (!context.user) {
+        throw new Error('You must be logged in to delete a team!');
+      }
+
+      const deletedTeam = await Team.findOneAndDelete({
+        _id: teamId,
+        owner: context.user._id,
+      });
+
+      if (!deletedTeam) {
+        throw new Error(
+          'Team not found or you may not have permission to delete it.',
+        );
+      }
+
+      return await User.findOneAndUpdate(
+        { _id: context.user._id },
+        { $pull: { teams: teamId } },
+        { new: true },
+      ).populate('teams');
     },
   },
   Team: {

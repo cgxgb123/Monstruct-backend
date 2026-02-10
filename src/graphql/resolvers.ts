@@ -1,27 +1,16 @@
 import User from '../models/User.ts';
+import Team from '../models/Team.ts';
 import { signToken } from '../utils/auth.ts';
-import { GraphQLError } from 'graphql';
+import axios from 'axios';
 
 export const resolvers = {
   Query: {
-    // test resolver
-    hello: () => 'The Monstruct API is active.',
-
-    me: async (_parent: any, _args: any, context: any) => {
-      if (context.user) {
-        return User.findOne({ _id: context.user._id });
-      }
-      throw new GraphQLError('You must be logged in!');
-    },
+    // getPokemon and getTeams queries
   },
-
   Mutation: {
-    //  triggers the 'pre-save' hook in user model
     testSignup: async (_parent: any, { username, email, password }: any) => {
       try {
         const user = await User.create({ username, email, password });
-
-        // triggers signToken - utils/auth.ts
         const token = signToken(user.username, user.email, user._id);
 
         return { token, user };

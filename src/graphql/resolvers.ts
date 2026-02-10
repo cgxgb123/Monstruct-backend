@@ -14,11 +14,25 @@ export const resolvers = {
         const token = signToken(user.username, user.email, user._id);
 
         return { token, user };
-      } catch (err) {
-        console.error(err);
-        throw new Error(
-          'Failed to create user. Check if email/username is unique.',
-        );
+      } catch (err: any) {
+        console.error(err); //  prints to your terminal
+        throw new Error(`Signup failed: ${err.message}`); //  prints to sandbox
+      }
+    },
+
+    login: async (_parent: any, { email, password }: any) => {
+      try {
+        const user = await User.findOne({ email });
+        if (!user) throw new Error('No user found with this email address');
+
+        const correctPw = await user.isCorrectPassword(password);
+        if (!correctPw) throw new Error('Incorrect credentials');
+
+        const token = signToken(user.username, user.email, user._id);
+        return { token, user };
+      } catch (err: any) {
+        console.error('Login Error:', err);
+        throw new Error(`Login failed: ${err.message}`);
       }
     },
   },

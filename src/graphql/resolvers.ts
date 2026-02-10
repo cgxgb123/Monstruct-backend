@@ -60,4 +60,14 @@ export const resolvers = {
       return newTeam;
     },
   },
+
+  Team: {
+    pokemonDetails: async (parent: any) => {
+      const requests = parent.pokemon.map((name: string) =>
+        axios.get(`https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`),
+      );
+      const responses = await Promise.all(requests);
+      return responses.map((res) => res.data);
+    },
+  },
 };

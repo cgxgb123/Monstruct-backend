@@ -34,6 +34,15 @@ export const resolvers = {
       }
       throw new Error('Not logged in');
     },
+    search: async (_: any, { name }: { name: string }, context: any) => {
+      const cleanInput = name.toLowerCase().trim();
+
+      if (!cleanInput || !context.allPokemonNames) return [];
+
+      return context.allPokemonNames
+        .filter((p: string) => p.includes(cleanInput))
+        .slice(0, 10);
+    },
   },
   Mutation: {
     signup: async (_parent: any, { username, email, password }: any) => {

@@ -17,6 +17,7 @@ export const typeDefs = gql`
     name: String
     displayName: String
     sprite: String
+    fallbackSprite: String
   }
 
   type Query {

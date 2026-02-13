@@ -53,10 +53,13 @@ export const resolvers = {
             .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(' ');
 
+          const showdownName = toGif(p.name);
+
           return {
             name: p.name,
             displayName: displayName,
             sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${id}.png`,
+            fallbackSprite: `https://play.pokemonshowdown.com/sprites/ani/${showdownName}.gif`,
           };
         });
     },

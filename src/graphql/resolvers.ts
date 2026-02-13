@@ -130,17 +130,26 @@ export const resolvers = {
     pokemonDetails: async (parent: any) => {
       const requests = parent.pokemon.map((name: string) => {
         const apiName = toApi(name);
-        return axios.get(`https://pokeapi.co/api/v2/pokemon/${apiName}`);
+        return axios
+          .get(`https://pokeapi.co/api/v2/pokemon/${apiName}`)
+          .then((response) => ({
+            ...response.data,
+            name: name, // Override with the original name from database
+          }));
       });
       const responses = await Promise.all(requests);
-      return responses.map((res) => res.data);
+      return responses;
     },
   },
 
   Pokemon: {
     spriteUrl: (parent: any) => {
+      console.log('parent.name:', parent.name);
       const showdownName = toGif(parent.name);
-      return `https://play.pokemonshowdown.com/sprites/ani/${showdownName}.gif`;
+      console.log('showdownName:', showdownName);
+      const url = `https://play.pokemonshowdown.com/sprites/ani/${showdownName}.gif`;
+      console.log('sprite URL:', url);
+      return url;
     },
     modelUrl: (parent: any) => {
       return (

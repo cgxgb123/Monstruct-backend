@@ -1,3 +1,60 @@
+export const toApi = (s: string): string => {
+  const name = s
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+
+  // points to base forms
+  if (name === 'tornadus') return 'tornadus-incarnate';
+  if (name === 'thundurus') return 'thundurus-incarnate';
+  if (name === 'landorus') return 'landorus-incarnate';
+  if (name === 'enamorus') return 'enamorus-incarnate';
+  if (name === 'darmanitan') return 'darmanitan-standard';
+  if (name === 'toxtricity') return 'toxtricity-amped';
+  if (name === 'darmanitan-galar') return 'darmanitan-galar-standard';
+  if (name === 'deoxys') return 'deoxys-normal';
+  if (name === 'wormadam') return 'wormadam-plant';
+  if (name === 'wormadam-sandy') return 'wormadam-sandy';
+  if (name === 'wormadam-trash') return 'wormadam-trash';
+  if (name === 'basculin') return 'basculin-red-striped';
+  if (name === 'giratina') return 'giratina-altered';
+  if (name === 'shaymin') return 'shaymin-land';
+  if (name === 'meloetta') return 'meloetta-aria';
+  if (name === 'keldeo') return 'keldeo-ordinary';
+  if (name === 'aegislash') return 'aegislash-shield';
+  if (name === 'aegislash-blade') return 'aegislash-blade';
+  if (name === 'pumpkaboo') return 'pumpkaboo-average';
+  if (name === 'gourgeist') return 'gourgeist-average';
+  if (name === 'xerneas-neutral') return 'xerneas-neutral';
+  if (name === 'oricorio') return 'oricorio-baile';
+  if (name === 'lycanroc') return 'lycanroc-midday';
+  if (name === 'wishiwashi') return 'wishiwashi-solo';
+  if (name === 'minior') return 'minior-red-meteor';
+  if (name === 'mimikyu') return 'mimikyu-disguised';
+  if (name === 'eiscue') return 'eiscue-ice';
+  if (name === 'indeedee') return 'indeedee-male';
+  if (name === 'morpeko') return 'morpeko-full-belly';
+  if (name === 'zacian-crowned') return 'zacian-crowned';
+  if (name === 'urshifu') return 'urshifu-single-strike';
+  if (name === 'basculegion') return 'basculegion-male';
+  if (name === 'oinkologne') return 'oinkologne-male';
+  if (name === 'dudunsparce') return 'dudunsparce-two-segment';
+  if (name === 'maushold') return 'maushold-family-of-three';
+  if (name === 'squawkabilly') return 'squawkabilly-green-plumage';
+  if (name === 'tatsugiri') return 'tatsugiri-curly';
+  if (name === 'gimmighoul') return 'gimmighoul-chest';
+  if (name === 'palafin') return 'palafin-zero';
+  if (name === 'greninja') return 'greninja-battle-bond';
+  if (name === 'zygarde') return 'zygarde-50';
+  if (name === 'burmy') return 'burmy-plant';
+  if (name === 'burmy-sandy') return 'burmy-sandy';
+  if (name === 'burmy-trash') return 'burmy-trash';
+
+  return name;
+};
+
 export const toGif = (name: string): string => {
   const clean = name.toLowerCase().replace(/[^a-z0-9-]/g, '');
 

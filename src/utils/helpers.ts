@@ -59,6 +59,13 @@ export const toApi = (s: string): string => {
 export const toGif = (name: string): string => {
   const clean = name.toLowerCase().replace(/[^a-z0-9-]/g, '');
   if (clean.includes('-gmax')) return clean;
+
+  // ===== MEGA EVOLUTIONS (SPECIAL CASES) =====
+  if (clean === 'charizard-mega-x') return 'charizard-megax';
+  if (clean === 'charizard-mega-y') return 'charizard-megay';
+  if (clean === 'mewtwo-mega-x') return 'mewtwo-megax';
+  if (clean === 'mewtwo-mega-y') return 'mewtwo-megay';
+
   if (clean.includes('-mega')) return clean;
   // ===== FORCES OF NATURE (INCARNATE VS THERIAN) =====
   if (clean === 'tornadus-incarnate') return 'tornadus';
@@ -81,12 +88,6 @@ export const toGif = (name: string): string => {
   if (clean === 'darmanitan-zen') return 'darmanitan-zen';
   if (clean === 'darmanitan-galar-standard') return 'darmanitan-galar';
   if (clean === 'darmanitan-galar-zen') return 'darmanitan-galarzen';
-
-  // ===== MEGA EVOLUTIONS (SPECIAL CASES) =====
-  if (clean === 'charizard-mega-x') return 'charizard-megax';
-  if (clean === 'charizard-mega-y') return 'charizard-megay';
-  if (clean === 'mewtwo-mega-x') return 'mewtwo-megax';
-  if (clean === 'mewtwo-mega-y') return 'mewtwo-megay';
 
   // ===== ROTOM FORMS =====
   if (clean === 'rotom-mow') return 'rotom-mow';

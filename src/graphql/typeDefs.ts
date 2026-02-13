@@ -13,11 +13,17 @@ export const typeDefs = gql`
     user: User
   }
 
+  type SearchResult {
+    name: String
+    displayName: String
+    sprite: String
+  }
+
   type Query {
     me: User
     getPokemon(name: String!): Pokemon
     getTeams: [Team]
-    search(name: String!): [String]
+    search(name: String!): [SearchResult]
   }
 
   type Team {

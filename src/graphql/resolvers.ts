@@ -7,16 +7,16 @@ import { toApi, toGif } from '../utils/helpers.ts';
 export const resolvers = {
   Query: {
     getPokemon: async (_parent: any, { name }: { name: string }) => {
-      console.log(`Searching PokeAPI for: ${name}`);
       try {
-        //  toApi: user input -> PokeAPI format
         const apiName = toApi(name);
-        console.log(`Transformed to API format: ${apiName}`);
-
         const { data } = await axios.get(
           `https://pokeapi.co/api/v2/pokemon/${apiName}`,
         );
-        return data;
+
+        return {
+          ...data,
+          name: apiName,
+        };
       } catch (err) {
         console.error('PokeAPI Error:', err);
         throw new Error('Could not find that Pokemon. Check your spelling!');
@@ -34,14 +34,26 @@ export const resolvers = {
       }
       throw new Error('Not logged in');
     },
+
     search: async (_: any, { name }: { name: string }, context: any) => {
       const cleanInput = name.toLowerCase().trim();
 
-      if (!cleanInput || !context.allPokemonNames) return [];
+      // context.allPokemon should be the array of {name, url} objects from index.ts
+      if (!cleanInput || !context.allPokemon) return [];
 
-      return context.allPokemonNames
-        .filter((p: string) => p.includes(cleanInput))
-        .slice(0, 10);
+      return context.allPokemon
+        .filter((p: any) => p.name.includes(cleanInput))
+        .slice(0, 10)
+        .map((p: any) => {
+          // Extracts ID from the URL string to build the HOME sprite link
+          const id = p.url.split('/').filter(Boolean).pop();
+
+          return {
+            name: p.name,
+            displayName: p.name.replace(/-/g, ' '),
+            sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${id}.png`,
+          };
+        });
     },
   },
   Mutation: {
@@ -49,10 +61,8 @@ export const resolvers = {
       try {
         const user = await User.create({ username, email, password });
         const token = signToken(user.username, user.email, user._id);
-
         return { token, user };
       } catch (err: any) {
-        console.error(err);
         throw new Error(`Signup failed: ${err.message}`);
       }
     },
@@ -68,7 +78,6 @@ export const resolvers = {
         const token = signToken(user.username, user.email, user._id);
         return { token, user };
       } catch (err: any) {
-        console.error('Login Error:', err);
         throw new Error(`Login failed: ${err.message}`);
       }
     },
@@ -78,9 +87,8 @@ export const resolvers = {
       { teamName, pokemon }: any,
       context: any,
     ) => {
-      if (!context.user) {
+      if (!context.user)
         throw new Error('You must be logged in to build a team!');
-      }
 
       const populatedTeam = await Team.create({
         teamName,
@@ -96,25 +104,21 @@ export const resolvers = {
 
       return populatedTeam.populate('owner');
     },
+
     removeTeam: async (
       _parent: any,
       { teamId }: { teamId: string },
       context: any,
     ) => {
-      if (!context.user) {
+      if (!context.user)
         throw new Error('You must be logged in to delete a team!');
-      }
 
       const deletedTeam = await Team.findOneAndDelete({
         _id: teamId,
         owner: context.user._id,
       });
 
-      if (!deletedTeam) {
-        throw new Error(
-          'Team not found or you may not have permission to delete it.',
-        );
-      }
+      if (!deletedTeam) throw new Error('Team not found.');
 
       return await User.findOneAndUpdate(
         { _id: context.user._id },
@@ -134,12 +138,10 @@ export const resolvers = {
     },
   },
   Pokemon: {
-    // creates the animated 3D GIF link
     spriteUrl: (parent: any) => {
       const showdownName = toGif(parent.name);
       return `https://play.pokemonshowdown.com/sprites/ani/${showdownName}.gif`;
     },
-    // grabs the high-res 3D static render from the PokeAPI data
     modelUrl: (parent: any) => {
       return (
         parent.sprites.other?.home?.front_default ||

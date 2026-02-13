@@ -5,7 +5,8 @@ export const toApi = (s: string): string => {
     .replace(/[^a-z0-9]/g, '-')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
-
+  if (name.includes('gmax')) return name;
+  if (name.endsWith('mega')) return name;
   // points to base forms
   if (name === 'tornadus') return 'tornadus-incarnate';
   if (name === 'thundurus') return 'thundurus-incarnate';
@@ -57,7 +58,8 @@ export const toApi = (s: string): string => {
 
 export const toGif = (name: string): string => {
   const clean = name.toLowerCase().replace(/[^a-z0-9-]/g, '');
-
+  if (clean.includes('-gmax')) return clean;
+  if (clean.includes('-mega')) return clean;
   // ===== FORCES OF NATURE (INCARNATE VS THERIAN) =====
   if (clean === 'tornadus-incarnate') return 'tornadus';
   if (clean === 'thundurus-incarnate') return 'thundurus';

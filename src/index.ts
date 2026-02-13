@@ -6,8 +6,8 @@ import http from 'http';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import db from './config/connection.ts';
-import { typeDefs } from './graphql/typeDefs.ts'; // PLACEHOLDER
-import { resolvers } from './graphql/resolvers.ts'; // PLACEHOLDER
+import { typeDefs } from './graphql/typeDefs.ts';
+import { resolvers } from './graphql/resolvers.ts';
 import { authMiddleware } from './utils/auth.ts';
 
 dotenv.config();

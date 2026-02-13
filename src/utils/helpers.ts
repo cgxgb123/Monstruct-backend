@@ -25,6 +25,7 @@ export const toApi = (s: string): string => {
   if (name === 'meloetta') return 'meloetta-aria';
   if (name === 'keldeo') return 'keldeo-ordinary';
   if (name === 'aegislash') return 'aegislash-shield';
+  if (name === 'dragonite-mega') return 'dragonite-mega';
   if (name === 'aegislash-blade') return 'aegislash-blade';
   if (name === 'pumpkaboo') return 'pumpkaboo-average';
   if (name === 'gourgeist') return 'gourgeist-average';
@@ -65,8 +66,27 @@ export const toGif = (name: string): string => {
   if (clean === 'charizard-mega-y') return 'charizard-megay';
   if (clean === 'mewtwo-mega-x') return 'mewtwo-megax';
   if (clean === 'mewtwo-mega-y') return 'mewtwo-megay';
+  if (clean === 'dragonite-mega') return 'dragonite-mega';
+  if (clean === 'pikachu-rock-star') return 'pikachu-rockstar';
+  if (clean === 'pikachu-hoenn-cap') return 'pikachu-hoenn-cap';
 
   if (clean.includes('-mega')) return clean;
+  if (clean === 'pikachu-rock-star') return 'pikachu-rockstar';
+  if (clean === 'pikachu-pop-star') return 'pikachu-popstar';
+  if (clean === 'pikachu-belle') return 'pikachu-belle';
+  if (clean === 'pikachu-phd') return 'pikachu-phd';
+  if (clean === 'pikachu-libre') return 'pikachu-libre';
+  if (clean === 'pikachu-cosplay') return 'pikachu-cosplay';
+  if (clean === 'pikachu-original-cap') return 'pikachu-original';
+  if (clean === 'pikachu-hoenn-cap') return 'pikachu-hoenn';
+  if (clean === 'pikachu-sinnoh-cap') return 'pikachu-sinnoh';
+  if (clean === 'pikachu-unova-cap') return 'pikachu-unova';
+  if (clean === 'pikachu-kalos-cap') return 'pikachu-kalos';
+  if (clean === 'pikachu-alola-cap') return 'pikachu-alola';
+  if (clean === 'pikachu-partner-cap') return 'pikachu-partner';
+  if (clean === 'pikachu-world-cap') return 'pikachu-world';
+  if (clean === 'eevee-starter') return 'eevee-starter';
+  if (clean === 'pikachu-starter') return 'pikachu-starter';
   // ===== FORCES OF NATURE (INCARNATE VS THERIAN) =====
   if (clean === 'tornadus-incarnate') return 'tornadus';
   if (clean === 'thundurus-incarnate') return 'thundurus';
@@ -395,12 +415,10 @@ export const toGif = (name: string): string => {
   if (clean === 'polteageist-phony') return 'polteageist';
   if (clean === 'polteageist-antique') return 'polteageist-antique';
 
-  // ===== EEVEE FORMS =====
-  if (clean === 'eevee-starter') return 'eevee-starter';
+  if (clean.includes('-alola')) return clean;
+  if (clean.includes('-galar')) return clean;
+  if (clean.includes('-hisui')) return clean;
+  if (clean.includes('-paldea')) return clean;
 
-  // ===== PIKACHU FORMS =====
-  if (clean === 'pikachu-starter') return 'pikachu-starter';
-
-  // Default: remove all hyphens for most Pokémon
   return clean.replace(/-/g, '');
 };

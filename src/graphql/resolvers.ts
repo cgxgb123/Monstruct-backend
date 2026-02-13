@@ -2,14 +2,19 @@ import User from '../models/User.ts';
 import Team from '../models/Team.ts';
 import { signToken } from '../utils/auth.ts';
 import axios from 'axios';
+import { toApi, toGif } from '../utils/helpers.ts';
 
 export const resolvers = {
   Query: {
     getPokemon: async (_parent: any, { name }: { name: string }) => {
       console.log(`Searching PokeAPI for: ${name}`);
       try {
+        //  toApi: user input -> PokeAPI format
+        const apiName = toApi(name);
+        console.log(`Transformed to API format: ${apiName}`);
+
         const { data } = await axios.get(
-          `https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`,
+          `https://pokeapi.co/api/v2/pokemon/${apiName}`,
         );
         return data;
       } catch (err) {
@@ -38,8 +43,8 @@ export const resolvers = {
 
         return { token, user };
       } catch (err: any) {
-        console.error(err); //  prints to your terminal
-        throw new Error(`Signup failed: ${err.message}`); //  prints to sandbox
+        console.error(err);
+        throw new Error(`Signup failed: ${err.message}`);
       }
     },
 
@@ -111,20 +116,21 @@ export const resolvers = {
   },
   Team: {
     pokemonDetails: async (parent: any) => {
-      const requests = parent.pokemon.map((name: string) =>
-        axios.get(`https://pokeapi.co/api/v2/pokemon/${name.toLowerCase()}`),
-      );
+      const requests = parent.pokemon.map((name: string) => {
+        const apiName = toApi(name);
+        return axios.get(`https://pokeapi.co/api/v2/pokemon/${apiName}`);
+      });
       const responses = await Promise.all(requests);
       return responses.map((res) => res.data);
     },
   },
   Pokemon: {
-    // This creates the animated 3D GIF link
+    // creates the animated 3D GIF link
     spriteUrl: (parent: any) => {
-      const cleanName = parent.name.toLowerCase().replace(/[^\w-]/g, '');
-      return `https://play.pokemonshowdown.com/sprites/ani/${cleanName}.gif`;
+      const showdownName = toGif(parent.name);
+      return `https://play.pokemonshowdown.com/sprites/ani/${showdownName}.gif`;
     },
-    // This grabs the high-res 3D static render from the PokeAPI data
+    // grabs the high-res 3D static render from the PokeAPI data
     modelUrl: (parent: any) => {
       return (
         parent.sprites.other?.home?.front_default ||

@@ -38,24 +38,30 @@ export const resolvers = {
     search: async (_: any, { name }: { name: string }, context: any) => {
       const cleanInput = name.toLowerCase().trim();
 
-      // context.allPokemon should be the array of {name, url} objects from index.ts
       if (!cleanInput || !context.allPokemon) return [];
 
       return context.allPokemon
         .filter((p: any) => p.name.includes(cleanInput))
         .slice(0, 10)
         .map((p: any) => {
-          // Extracts ID from the URL string to build the HOME sprite link
           const id = p.url.split('/').filter(Boolean).pop();
+
+          // technical name stays lowercase for API calls
+          // display name gets capitalized for the UI
+          const displayName = p.name
+            .split('-')
+            .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
 
           return {
             name: p.name,
-            displayName: p.name.replace(/-/g, ' '),
+            displayName: displayName,
             sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${id}.png`,
           };
         });
     },
   },
+
   Mutation: {
     signup: async (_parent: any, { username, email, password }: any) => {
       try {
@@ -71,10 +77,8 @@ export const resolvers = {
       try {
         const user = await User.findOne({ email });
         if (!user) throw new Error('No user found with this email address');
-
         const correctPw = await user.isCorrectPassword(password);
         if (!correctPw) throw new Error('Incorrect credentials');
-
         const token = signToken(user.username, user.email, user._id);
         return { token, user };
       } catch (err: any) {
@@ -89,19 +93,16 @@ export const resolvers = {
     ) => {
       if (!context.user)
         throw new Error('You must be logged in to build a team!');
-
       const populatedTeam = await Team.create({
         teamName,
         pokemon,
         owner: context.user._id,
       });
-
       await User.findByIdAndUpdate(
         context.user._id,
         { $push: { teams: populatedTeam._id } },
         { new: true },
       );
-
       return populatedTeam.populate('owner');
     },
 
@@ -112,14 +113,11 @@ export const resolvers = {
     ) => {
       if (!context.user)
         throw new Error('You must be logged in to delete a team!');
-
       const deletedTeam = await Team.findOneAndDelete({
         _id: teamId,
         owner: context.user._id,
       });
-
       if (!deletedTeam) throw new Error('Team not found.');
-
       return await User.findOneAndUpdate(
         { _id: context.user._id },
         { $pull: { teams: teamId } },
@@ -127,6 +125,7 @@ export const resolvers = {
       ).populate('teams');
     },
   },
+
   Team: {
     pokemonDetails: async (parent: any) => {
       const requests = parent.pokemon.map((name: string) => {
@@ -137,6 +136,7 @@ export const resolvers = {
       return responses.map((res) => res.data);
     },
   },
+
   Pokemon: {
     spriteUrl: (parent: any) => {
       const showdownName = toGif(parent.name);

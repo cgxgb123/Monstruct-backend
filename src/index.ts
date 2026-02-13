@@ -15,23 +15,18 @@ dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 
-let allPokemonNames: string[] = [];
+let allPokemon: any[] = [];
 
 const loadPokemonNames = async () => {
   try {
     const { data } = await axios.get(
       'https://pokeapi.co/api/v2/pokemon?limit=10000',
     );
-    allPokemonNames = data.results.map((p: any) => p.name);
+    allPokemon = data.results;
   } catch (err) {
     console.error(err);
   }
 };
-
-interface MyContext {
-  token?: string;
-  allPokemonNames?: string[];
-}
 
 async function startServer() {
   await loadPokemonNames();
@@ -58,7 +53,7 @@ async function startServer() {
         const auth = authMiddleware({ req });
         return {
           ...auth,
-          allPokemonNames,
+          allPokemon,
         };
       },
     }),

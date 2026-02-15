@@ -91,21 +91,25 @@ export const resolvers = {
 
     saveTeam: async (
       _parent: any,
-      { teamName, pokemon }: any,
+      { teamName, format, members }: any,
       context: any,
     ) => {
       if (!context.user)
         throw new Error('You must be logged in to build a team!');
+
       const populatedTeam = await Team.create({
         teamName,
-        pokemon,
+        format,
+        members, // Mongoose will now validate this against the new schema
         owner: context.user._id,
       });
+
       await User.findByIdAndUpdate(
         context.user._id,
         { $push: { teams: populatedTeam._id } },
         { new: true },
       );
+
       return populatedTeam.populate('owner');
     },
 
@@ -128,23 +132,21 @@ export const resolvers = {
       ).populate('teams');
     },
   },
-
-  Team: {
-    pokemonDetails: async (parent: any) => {
-      const requests = parent.pokemon.map((name: string) => {
-        const apiName = toApi(name);
-        return axios
-          .get(`https://pokeapi.co/api/v2/pokemon/${apiName}`)
-          .then((response) => ({
-            ...response.data,
-            name: name, // Override with the original name from database
-          }));
-      });
-      const responses = await Promise.all(requests);
-      return responses;
+  TeamMember: {
+    spriteUrl: (parent: any) => {
+      // 'parent' here is the team member from your MongoDB array
+      const showdownName = toGif(parent.name);
+      return `https://play.pokemonshowdown.com/sprites/ani/${showdownName}.gif`;
+    },
+    modelUrl: async (parent: any) => {
+      try {
+        //   official Artwork(Home) sprites
+        return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${parent.id}.png`;
+      } catch (err) {
+        return null;
+      }
     },
   },
-
   Pokemon: {
     spriteUrl: (parent: any) => {
       console.log('parent.name:', parent.name);

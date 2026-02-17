@@ -28,7 +28,6 @@ userSchema.pre<IUser>('save', async function () {
   }
 });
 
-// 4. Custom Method for Auth
 userSchema.methods.isCorrectPassword = async function (password: string) {
   return bcrypt.compare(password, this.password);
 };

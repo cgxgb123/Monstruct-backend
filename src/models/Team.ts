@@ -1,7 +1,8 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 
 interface ITeamMember {
-  name?: string;
+  species?: string;
+  nickname?: string;
   shiny: boolean;
   gender: 'M' | 'F' | 'N';
   level: number;
@@ -28,10 +29,10 @@ interface ITeamMember {
   };
 }
 
-//  sub-schema
 const teamMemberSchema = new Schema<ITeamMember>(
   {
-    name: { type: String },
+    species: { type: String },
+    nickname: { type: String },
     shiny: { type: Boolean, default: false },
     gender: { type: String, enum: ['M', 'F', 'N'], default: 'N' },
     level: { type: Number, default: 50 },
@@ -58,20 +59,31 @@ const teamMemberSchema = new Schema<ITeamMember>(
     },
   },
   { _id: false },
-); // prevents Mongoose from creating sub-IDs for every pokemon
+);
 
-export interface ITeam {
+export interface ITeam extends Document {
   teamName: string;
   format: string;
   members: ITeamMember[];
-  owner: Schema.Types.ObjectId;
+  owner: Types.ObjectId; // Reference to User
 }
 
-const teamSchema = new Schema<ITeam>({
-  teamName: { type: String, required: true, trim: true },
-  format: { type: String, default: 'gen9vgc2026regi' },
-  members: [teamMemberSchema],
-});
+const teamSchema = new Schema<ITeam>(
+  {
+    teamName: { type: String, required: true, trim: true },
+    format: { type: String, default: 'gen9vgc2026regi' },
+    members: [teamMemberSchema],
+    // FIXED: Add owner field with ref to User model
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
 
 teamSchema.path('members').validate(function (value: ITeamMember[]) {
   return value.length <= 6;

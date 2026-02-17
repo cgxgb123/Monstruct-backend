@@ -6,6 +6,14 @@ import { toApi, toGif } from '../utils/helpers.ts';
 
 export const resolvers = {
   Query: {
+    getTeam: async (
+      _parent: any,
+      { teamId }: { teamId: string },
+      context: any,
+    ) => {
+      // check if user owns this team
+      return Team.findById(teamId).populate('owner');
+    },
     getPokemon: async (_parent: any, { name }: { name: string }) => {
       try {
         const apiName = toApi(name);
@@ -75,7 +83,22 @@ export const resolvers = {
         throw new Error(`Signup failed: ${err.message}`);
       }
     },
+    updateTeam: async (
+      _parent: any,
+      { teamId, teamName, format, members }: any,
+      context: any,
+    ) => {
+      if (!context.user) throw new Error('You must be logged in!');
 
+      const updatedTeam = await Team.findOneAndUpdate(
+        { _id: teamId, owner: context.user._id }, // ensure ownership
+        { teamName, format, members },
+        { new: true },
+      );
+
+      if (!updatedTeam) throw new Error('Team not found or unauthorized');
+      return updatedTeam.populate('owner');
+    },
     login: async (_parent: any, { email, password }: any) => {
       try {
         const user = await User.findOne({ email });
@@ -100,7 +123,7 @@ export const resolvers = {
       const populatedTeam = await Team.create({
         teamName,
         format,
-        members, // Mongoose will now validate this against the new schema
+        members,
         owner: context.user._id,
       });
 
@@ -110,7 +133,7 @@ export const resolvers = {
         { new: true },
       );
 
-      return populatedTeam.populate('owner');
+      return await Team.findById(populatedTeam._id).populate('owner');
     },
 
     removeTeam: async (

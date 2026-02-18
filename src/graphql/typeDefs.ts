@@ -74,6 +74,7 @@ export const typeDefs = gql`
     me: User
     getPokemon(name: String!): Pokemon
     getTeams: [Team]
+    getMove(name: String!): Move
     getTeam(teamId: ID!): Team
     search(name: String!): [SearchResult]
   }

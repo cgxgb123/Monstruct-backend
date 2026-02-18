@@ -1,3 +1,4 @@
+// Monstruct-backend/src/graphql/resolvers.ts
 import User from '../models/User.ts';
 import Team from '../models/Team.ts';
 import { signToken } from '../utils/auth.ts';
@@ -6,14 +7,6 @@ import { toApi, toGif } from '../utils/helpers.ts';
 
 export const resolvers = {
   Query: {
-    getTeam: async (
-      _parent: any,
-      { teamId }: { teamId: string },
-      context: any,
-    ) => {
-      // check if user owns this team
-      return Team.findById(teamId).populate('owner');
-    },
     getPokemon: async (_parent: any, { name }: { name: string }) => {
       try {
         const apiName = toApi(name);
@@ -33,12 +26,49 @@ export const resolvers = {
 
     getTeams: async (_parent: any, _args: any, context: any) => {
       if (!context.user) throw new Error('Not logged in');
-      return Team.find({ owner: context.user._id }).populate('owner');
+
+      const teams = await Team.find({ owner: context.user._id }).populate(
+        'owner',
+      );
+
+      console.log('=== getTeams DEBUG ===');
+      console.log('Teams found:', teams.length);
+      teams.forEach((team, i) => {
+        console.log(
+          `Team ${i}: ${team.teamName}, members: ${team.members?.length}`,
+        );
+        if (team.members?.length > 0) {
+          console.log('First member:', team.members[0].species);
+        }
+      });
+      console.log('========================');
+
+      return teams;
+    },
+
+    getTeam: async (
+      _parent: any,
+      { teamId }: { teamId: string },
+      context: any,
+    ) => {
+      if (!context.user) throw new Error('Not logged in');
+
+      const team = await Team.findOne({
+        _id: teamId,
+        owner: context.user._id,
+      }).populate('owner');
+
+      console.log('=== getTeam DEBUG ===');
+      console.log('Team found:', team?.teamName);
+      console.log('Members:', team?.members?.length);
+      console.log('========================');
+
+      return team;
     },
 
     me: async (_parent: any, _args: any, context: any) => {
       if (context.user) {
-        return User.findOne({ _id: context.user._id });
+        return User.findOne({ _id: context.user._id }).populate('teams');
       }
       throw new Error('Not logged in');
     },
@@ -54,8 +84,6 @@ export const resolvers = {
         .map((p: any) => {
           const id = p.url.split('/').filter(Boolean).pop();
 
-          // technical name stays lowercase for API calls
-          // display name gets capitalized for the UI
           const displayName = p.name
             .split('-')
             .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -83,22 +111,7 @@ export const resolvers = {
         throw new Error(`Signup failed: ${err.message}`);
       }
     },
-    updateTeam: async (
-      _parent: any,
-      { teamId, teamName, format, members }: any,
-      context: any,
-    ) => {
-      if (!context.user) throw new Error('You must be logged in!');
 
-      const updatedTeam = await Team.findOneAndUpdate(
-        { _id: teamId, owner: context.user._id }, // ensure ownership
-        { teamName, format, members },
-        { new: true },
-      );
-
-      if (!updatedTeam) throw new Error('Team not found or unauthorized');
-      return updatedTeam.populate('owner');
-    },
     login: async (_parent: any, { email, password }: any) => {
       try {
         const user = await User.findOne({ email });
@@ -120,20 +133,61 @@ export const resolvers = {
       if (!context.user)
         throw new Error('You must be logged in to build a team!');
 
-      const populatedTeam = await Team.create({
-        teamName,
-        format,
-        members,
-        owner: context.user._id,
-      });
+      console.log('=== SAVE TEAM DEBUG ===');
+      console.log('Team Name:', teamName);
+      console.log('Format:', format);
+      console.log('Members Count:', members?.length);
+      console.log('First Member:', members?.[0]);
+      console.log('User ID:', context.user._id);
+      console.log('=========================');
 
-      await User.findByIdAndUpdate(
-        context.user._id,
-        { $push: { teams: populatedTeam._id } },
+      if (!members || members.length === 0) {
+        throw new Error('No members provided in team');
+      }
+
+      try {
+        const populatedTeam = await Team.create({
+          teamName,
+          format,
+          members,
+          owner: context.user._id,
+        });
+
+        console.log('Team saved with ID:', populatedTeam._id);
+        console.log('Team members in DB:', populatedTeam.members?.length);
+
+        await User.findByIdAndUpdate(
+          context.user._id,
+          { $push: { teams: populatedTeam._id } },
+          { new: true },
+        );
+
+        const savedTeam = await Team.findById(populatedTeam._id).populate(
+          'owner',
+        );
+        console.log('Returned team members:', savedTeam?.members?.length);
+        return savedTeam;
+      } catch (err: any) {
+        console.error('Save error:', err.message);
+        throw err;
+      }
+    },
+
+    updateTeam: async (
+      _parent: any,
+      { teamId, teamName, format, members }: any,
+      context: any,
+    ) => {
+      if (!context.user) throw new Error('You must be logged in!');
+
+      const updatedTeam = await Team.findOneAndUpdate(
+        { _id: teamId, owner: context.user._id },
+        { teamName, format, members },
         { new: true },
       );
 
-      return await Team.findById(populatedTeam._id).populate('owner');
+      if (!updatedTeam) throw new Error('Team not found or unauthorized');
+      return updatedTeam.populate('owner');
     },
 
     removeTeam: async (
@@ -155,35 +209,24 @@ export const resolvers = {
       ).populate('teams');
     },
   },
+
   TeamMember: {
     spriteUrl: (parent: any) => {
-      // 'parent' here is the team member from your MongoDB array
-      const showdownName = toGif(parent.name);
+      const showdownName = toGif(parent.species);
       return `https://play.pokemonshowdown.com/sprites/ani/${showdownName}.gif`;
     },
     modelUrl: async (parent: any) => {
       try {
-        //   official Artwork(Home) sprites
         return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${parent.id}.png`;
       } catch (err) {
         return null;
       }
     },
   },
-  Pokemon: {
-    spriteUrl: (parent: any) => {
-      console.log('parent.name:', parent.name);
-      const showdownName = toGif(parent.name);
-      console.log('showdownName:', showdownName);
-      const url = `https://play.pokemonshowdown.com/sprites/ani/${showdownName}.gif`;
-      console.log('sprite URL:', url);
-      return url;
-    },
-    modelUrl: (parent: any) => {
-      return (
-        parent.sprites.other?.home?.front_default ||
-        parent.sprites.front_default
-      );
-    },
+
+  Team: {
+    teamName: (parent: any) => parent.teamName,
+    format: (parent: any) => parent.format,
+    members: (parent: any) => parent.members || [],
   },
 };

@@ -1,3 +1,4 @@
+// Monstruct-backend/src/graphql/typeDefs.ts
 import { gql } from 'graphql-tag';
 
 export const typeDefs = gql`
@@ -69,11 +70,11 @@ export const typeDefs = gql`
     sprite: String
     fallbackSprite: String
   }
-
   type Query {
     me: User
     getPokemon(name: String!): Pokemon
     getTeams: [Team]
+    getTeam(teamId: ID!): Team
     search(name: String!): [SearchResult]
   }
 
@@ -91,8 +92,8 @@ export const typeDefs = gql`
     name: String
     sprites: Sprites
     types: [TypeSlot]
-    spriteUrl: String # animated gif URL
-    modelUrl: String # 3D model URL (if available)
+    spriteUrl: String
+    modelUrl: String
   }
 
   type Sprites {
@@ -110,7 +111,14 @@ export const typeDefs = gql`
   type Mutation {
     signup(username: String!, email: String!, password: String!): Auth
     login(email: String!, password: String!): Auth
+    # FIXED: Ensure members argument is defined here
     saveTeam(
+      teamName: String!
+      format: String!
+      members: [TeamMemberInput]!
+    ): Team
+    updateTeam(
+      teamId: ID!
       teamName: String!
       format: String!
       members: [TeamMemberInput]!

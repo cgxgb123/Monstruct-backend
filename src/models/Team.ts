@@ -1,7 +1,8 @@
-import { Schema, model, Types } from 'mongoose';
+// Monstruct-backend/src/models/Team.ts
+import { Schema, model, Types, Document } from 'mongoose';
 
 interface ITeamMember {
-  species?: string;
+  species: string;
   nickname?: string;
   shiny: boolean;
   gender: 'M' | 'F' | 'N';
@@ -31,7 +32,7 @@ interface ITeamMember {
 
 const teamMemberSchema = new Schema<ITeamMember>(
   {
-    species: { type: String },
+    species: { type: String, required: true },
     nickname: { type: String },
     shiny: { type: Boolean, default: false },
     gender: { type: String, enum: ['M', 'F', 'N'], default: 'N' },
@@ -40,7 +41,7 @@ const teamMemberSchema = new Schema<ITeamMember>(
     ability: { type: String, default: '' },
     nature: { type: String, default: 'Serious' },
     teraType: { type: String, default: 'Normal' },
-    moves: { type: [String], default: ['', '', '', ''] },
+    moves: { type: [String], default: [] },
     evs: {
       hp: { type: Number, default: 0 },
       atk: { type: Number, default: 0 },
@@ -65,7 +66,7 @@ export interface ITeam extends Document {
   teamName: string;
   format: string;
   members: ITeamMember[];
-  owner: Types.ObjectId; // Reference to User
+  owner: Types.ObjectId;
 }
 
 const teamSchema = new Schema<ITeam>(
@@ -73,21 +74,12 @@ const teamSchema = new Schema<ITeam>(
     teamName: { type: String, required: true, trim: true },
     format: { type: String, default: 'gen9vgc2026regi' },
     members: [teamMemberSchema],
-    // FIXED: Add owner field with ref to User model
-    owner: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
+    owner: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   },
   {
     timestamps: true,
   },
 );
-
-teamSchema.path('members').validate(function (value: ITeamMember[]) {
-  return value.length <= 6;
-}, 'Team cannot exceed 6 Pokemon');
 
 const Team = model<ITeam>('Team', teamSchema);
 export default Team;

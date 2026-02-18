@@ -1,4 +1,3 @@
-// Monstruct-backend/src/graphql/typeDefs.ts
 import { gql } from 'graphql-tag';
 
 export const typeDefs = gql`
@@ -70,6 +69,7 @@ export const typeDefs = gql`
     sprite: String
     fallbackSprite: String
   }
+
   type Query {
     me: User
     getPokemon(name: String!): Pokemon
@@ -87,9 +87,20 @@ export const typeDefs = gql`
     createdAt: String
   }
 
+  type Move {
+    name: String
+    power: Int
+    accuracy: Int
+    pp: Int
+    type: String
+    damageClass: String
+    description: String
+  }
+
   type Pokemon {
     id: Int
     name: String
+    moves: [String]
     sprites: Sprites
     types: [TypeSlot]
     spriteUrl: String
@@ -111,7 +122,6 @@ export const typeDefs = gql`
   type Mutation {
     signup(username: String!, email: String!, password: String!): Auth
     login(email: String!, password: String!): Auth
-    # FIXED: Ensure members argument is defined here
     saveTeam(
       teamName: String!
       format: String!

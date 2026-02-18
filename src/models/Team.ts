@@ -1,4 +1,4 @@
-// Monstruct-backend/src/models/Team.ts
+// Monstruct-backend/src/models/Team.ts:
 import { Schema, model, Types, Document } from 'mongoose';
 
 interface ITeamMember {

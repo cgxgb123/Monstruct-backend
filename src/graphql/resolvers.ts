@@ -34,7 +34,6 @@ export const resolvers = {
       if (!context.user) throw new Error('Not logged in');
 
       const teams = await Team.find({ owner: context.user._id }).lean();
-
       return teams;
     },
 
@@ -122,23 +121,59 @@ export const resolvers = {
         throw new Error('No members provided in team');
       }
 
+      const processedMembers = members.map((member: any) => {
+        return {
+          species: member.species,
+          nickname: member.nickname || member.species,
+          shiny: member.shiny || false,
+          gender: 'N',
+          level: 50,
+          item: member.item || '',
+          ability: member.ability || '',
+          nature: member.nature || 'Serious',
+          teraType: member.teraType || 'Normal',
+          moves: member.moves || ['', '', '', ''],
+          evs: {
+            hp: Number(member.evs?.hp) || 0,
+            atk: Number(member.evs?.atk) || 0,
+            def: Number(member.evs?.def) || 0,
+            spa: Number(member.evs?.spa) || 0,
+            spd: Number(member.evs?.spd) || 0,
+            spe: Number(member.evs?.spe) || 0,
+          },
+          ivs: {
+            hp: Number(member.ivs?.hp) || 31,
+            atk: Number(member.ivs?.atk) || 31,
+            def: Number(member.ivs?.def) || 31,
+            spa: Number(member.ivs?.spa) || 31,
+            spd: Number(member.ivs?.spd) || 31,
+            spe: Number(member.ivs?.spe) || 31,
+          },
+        };
+      });
+
       try {
-        const populatedTeam = await Team.create({
+        const team = new Team({
           teamName,
           format,
-          members,
+          members: processedMembers,
           owner: context.user._id,
         });
 
+        // Save the team to DB
+        await team.save();
+
+        // update teams array
         await User.findByIdAndUpdate(
           context.user._id,
-          { $push: { teams: populatedTeam._id } },
+          { $push: { teams: team._id } },
           { new: true },
         );
 
-        const savedTeam = await Team.findById(populatedTeam._id).lean();
-        return savedTeam;
+        // returns team with all fields
+        return team.toObject();
       } catch (err: any) {
+        console.error('Save error:', err);
         throw err;
       }
     },
@@ -150,14 +185,52 @@ export const resolvers = {
     ) => {
       if (!context.user) throw new Error('You must be logged in!');
 
-      const updatedTeam = await Team.findOneAndUpdate(
-        { _id: teamId, owner: context.user._id },
-        { teamName, format, members },
-        { new: true },
-      ).lean();
+      const processedMembers = members.map((member: any) => {
+        return {
+          species: member.species,
+          nickname: member.nickname || member.species,
+          shiny: member.shiny || false,
+          gender: 'N',
+          level: 50,
+          item: member.item || '',
+          ability: member.ability || '',
+          nature: member.nature || 'Serious',
+          teraType: member.teraType || 'Normal',
+          moves: member.moves || ['', '', '', ''],
+          evs: {
+            hp: Number(member.evs?.hp) || 0,
+            atk: Number(member.evs?.atk) || 0,
+            def: Number(member.evs?.def) || 0,
+            spa: Number(member.evs?.spa) || 0,
+            spd: Number(member.evs?.spd) || 0,
+            spe: Number(member.evs?.spe) || 0,
+          },
+          ivs: {
+            hp: Number(member.ivs?.hp) || 31,
+            atk: Number(member.ivs?.atk) || 31,
+            def: Number(member.ivs?.def) || 31,
+            spa: Number(member.ivs?.spa) || 31,
+            spd: Number(member.ivs?.spd) || 31,
+            spe: Number(member.ivs?.spe) || 31,
+          },
+        };
+      });
 
-      if (!updatedTeam) throw new Error('Team not found or unauthorized');
-      return updatedTeam;
+      const team = await Team.findOneAndUpdate(
+        { _id: teamId, owner: context.user._id },
+        {
+          teamName,
+          format,
+          members: processedMembers,
+        },
+        {
+          new: true,
+          runValidators: true,
+        },
+      );
+
+      if (!team) throw new Error('Team not found or unauthorized');
+      return team.toObject();
     },
 
     removeTeam: async (

@@ -1,4 +1,3 @@
-// Monstruct-backend/src/graphql/resolvers.ts
 import User from '../models/User.ts';
 import Team from '../models/Team.ts';
 import { signToken } from '../utils/auth.ts';
@@ -31,17 +30,14 @@ export const resolvers = {
         'owner',
       );
 
-      console.log('=== getTeams DEBUG ===');
       console.log('Teams found:', teams.length);
       teams.forEach((team, i) => {
         console.log(
           `Team ${i}: ${team.teamName}, members: ${team.members?.length}`,
         );
         if (team.members?.length > 0) {
-          console.log('First member:', team.members[0].species);
         }
       });
-      console.log('========================');
 
       return teams;
     },

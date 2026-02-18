@@ -14,6 +14,28 @@ const CDN_BASE =
 
 export const resolvers = {
   Query: {
+    getMove: async (_parent: any, { name }: { name: string }) => {
+      try {
+        const cleanName = name.toLowerCase().replace(' ', '-');
+        const { data } = await axios.get(
+          `https://pokeapi.co/api/v2/move/${cleanName}`,
+        );
+
+        return {
+          name: data.name,
+          power: data.power,
+          accuracy: data.accuracy,
+          pp: data.pp,
+          type: data.type.name,
+          damageClass: data.damage_class.name,
+          description:
+            data.effect_entries.find((e: any) => e.language.name === 'en')
+              ?.short_effect || '',
+        };
+      } catch (err) {
+        return null;
+      }
+    },
     getPokemon: async (_parent: any, { name }: { name: string }) => {
       try {
         const apiName = toApi(name);

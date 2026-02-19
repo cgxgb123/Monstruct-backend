@@ -44,7 +44,11 @@ async function startServer() {
 
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
-  app.use(cors());
+  app.use(
+    cors({
+      origin: 'https://monstruct.vercel.app/',
+    }),
+  );
 
   app.use(
     '/graphql',

@@ -46,7 +46,7 @@ async function startServer() {
   app.use(express.json());
   app.use(
     cors({
-      origin: 'https://monstruct.vercel.app/',
+      origin: 'https://monstruct.vercel.app',
     }),
   );
 
